@@ -1,0 +1,44 @@
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PlatformIO files
+.pio/
+*.pioenvs/
+*.piolibdeps/
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build files
+build/
+dist/
+out/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Serial ports
+COM*
+/dev/*
+
+# Environment files
+.env
+*.env.local
+
+# Debug logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local development files
+local.*
