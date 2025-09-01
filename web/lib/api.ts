@@ -90,11 +90,11 @@ class IrrigationAPI {
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
-    // Ensure endpoint starts with slash and includes version
-    const normalizedEndpoint = endpoint.startsWith('/') ? 
-      `/api/${this.apiVersion}${endpoint}` : 
-      `/api/${this.apiVersion}/${endpoint}`
-      
+    // Normalize endpoint to /api/<version>/<path-without-leading-slash>
+    const path = endpoint.replace(/^\/+|\/+$/g, '') // trim slashes
+    // if endpoint already contains "api/" at beginning, remove it
+    const clean = path.replace(/^api\/+/i, '')
+    const normalizedEndpoint = `/api/${this.apiVersion}/${clean}`
     const url = `${this.baseUrl}${normalizedEndpoint}`
 
     // Add basic auth if credentials are set
@@ -137,7 +137,7 @@ class IrrigationAPI {
 
   // System status endpoints
   async getStatus(): Promise<IrrigationStatus> {
-    const response = await this.makeRequest("/api/status")
+    const response = await this.makeRequest("/status")
     return response.json()
   }
 
@@ -148,7 +148,7 @@ class IrrigationAPI {
       formData.append(key, value.toString())
     })
 
-    const response = await this.makeRequest("/api/config/rtc", {
+    const response = await this.makeRequest("/config/rtc", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -159,7 +159,7 @@ class IrrigationAPI {
   }
 
   async restartRTC(): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/rtc/restart", {
+    const response = await this.makeRequest("/rtc/restart", {
       method: "POST",
     })
     return response.json()
@@ -167,12 +167,12 @@ class IrrigationAPI {
 
   // Configuration management endpoints
   async getConfig(): Promise<SystemConfig> {
-    const response = await this.makeRequest("/api/config")
+    const response = await this.makeRequest("/config")
     return response.json()
   }
 
   async updateConfig(config: Partial<SystemConfig>): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/config", {
+    const response = await this.makeRequest("/config", {
       method: "PUT",
       body: JSON.stringify(config),
     })
@@ -180,7 +180,7 @@ class IrrigationAPI {
   }
 
   async updateZones(zones: ZoneConfig[]): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/config/zones", {
+    const response = await this.makeRequest("/config/zones", {
       method: "PUT",
       body: JSON.stringify({ zones }),
     })
@@ -188,12 +188,12 @@ class IrrigationAPI {
   }
 
   async getZoneConfig(): Promise<{ zones: ZoneConfig[] }> {
-    const response = await this.makeRequest("/api/config/zones")
+    const response = await this.makeRequest("/config/zones")
     return response.json()
   }
 
   async updateSystemConfig(config: any): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/config/system", {
+    const response = await this.makeRequest("/config/system", {
       method: "PUT",
       body: JSON.stringify(config),
     })
@@ -201,12 +201,12 @@ class IrrigationAPI {
   }
 
   async getDefaultConfig(): Promise<SystemConfig> {
-    const response = await this.makeRequest("/api/config/defaults")
+    const response = await this.makeRequest("/config/defaults")
     return response.json()
   }
 
   async resetConfig(): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/config/reset", {
+    const response = await this.makeRequest("/config/reset", {
       method: "POST",
     })
     return response.json()
@@ -214,19 +214,19 @@ class IrrigationAPI {
 
   // Backup management endpoints
   async listBackups(): Promise<{ backups: number; last_backup: string }> {
-    const response = await this.makeRequest("/api/config/backup")
+    const response = await this.makeRequest("/config/backup")
     return response.json()
   }
 
   async createBackup(): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/config/backup", {
+    const response = await this.makeRequest("/config/backup", {
       method: "POST",
     })
     return response.json()
   }
 
   async restoreBackup(): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/config/backup/restore", {
+    const response = await this.makeRequest("/config/backup/restore", {
       method: "POST",
     })
     return response.json()
@@ -234,7 +234,7 @@ class IrrigationAPI {
 
   // Zone control methods (for future WebSocket integration)
   async startZone(zoneId: number, duration?: number): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/zones/start", {
+    const response = await this.makeRequest("/zones/start", {
       method: "POST",
       body: JSON.stringify({ zoneId, duration }),
     })
@@ -242,7 +242,7 @@ class IrrigationAPI {
   }
 
   async stopZone(zoneId: number): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/zones/stop", {
+    const response = await this.makeRequest("/zones/stop", {
       method: "POST",
       body: JSON.stringify({ zoneId }),
     })
@@ -250,7 +250,7 @@ class IrrigationAPI {
   }
 
   async emergencyStop(): Promise<{ status: string; message: string }> {
-    const response = await this.makeRequest("/api/emergency/stop", {
+    const response = await this.makeRequest("/emergency/stop", {
       method: "POST",
     })
     return response.json()
