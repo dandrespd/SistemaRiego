@@ -25,15 +25,16 @@
 // CONFIGURACIÓN DE RED PRINCIPAL
 // =============================================================================
 
+#pragma once
+#include "config.local.h" // file NOT tracked by git: contains actual SSID/pass
+
 // **RED PRINCIPAL**: Configurar con tus credenciales WiFi
-// IMPORTANTE: Cambiar estas credenciales por las de tu red
-const char* ssid = "OPTI-94A79E";        // Nombre de tu red WiFi principal
-const char* password = "Princesa2001";   // Contraseña de tu red WiFi principal
+const char* ssid = WIFI_SSID_LOCAL;        // Nombre de tu red WiFi principal
+const char* password = WIFI_PASS_LOCAL;    // Contraseña de tu red WiFi principal
 
 // **REDES DE RESPALDO**: Para mayor robustez del sistema
-// Útil si la red principal falla o tienes múltiples puntos de acceso
-const char* ssid_backup = "MiWiFi_Guest";     // Red de respaldo opcional
-const char* password_backup = "password123";  // Contraseña de red de respaldo
+const char* ssid_backup = WIFI_SSID_BACKUP_LOCAL;     // Red de respaldo opcional
+const char* password_backup = WIFI_PASS_BACKUP_LOCAL; // Contraseña de red de respaldo
 
 // =============================================================================
 // CONFIGURACIÓN DE MODO ACCESS POINT (AP)

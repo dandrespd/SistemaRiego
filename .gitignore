@@ -28,6 +28,11 @@ Thumbs.db
 COM*
 /dev/*
 
+# Local configuration files
+firmware/config.local.h
+*.key
+*.pem
+
 # Environment files
 .env
 *.env.local
