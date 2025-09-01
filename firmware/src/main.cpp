@@ -133,8 +133,10 @@ void setup() {
     // **FASE 4.5: CONFIGURACIÓN DE ACTUALIZACIONES OTA**
     DEBUG_PRINTLN("\n📡 [SETUP] Configurando actualizaciones OTA...");
     
-    // Configurar OTA con hostname y sin contraseña por defecto
+    // Configurar OTA con hostname y contraseña segura
+    #include "config.local.h" // define OTA_PASSWORD_LOCAL
     ArduinoOTA.setHostname("riego-inteligente");
+    ArduinoOTA.setPassword(OTA_PASSWORD_LOCAL);
     
     // Configurar callbacks de OTA para feedback
     ArduinoOTA.onStart([]() {

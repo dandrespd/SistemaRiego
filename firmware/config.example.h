@@ -13,3 +13,6 @@
 // Backup WiFi network credentials (optional)
 #define WIFI_SSID_BACKUP_LOCAL "<YOUR_BACKUP_SSID>"
 #define WIFI_PASS_BACKUP_LOCAL "<YOUR_BACKUP_PASSWORD>"
+
+// OTA Update password (required)
+#define OTA_PASSWORD_LOCAL "<YOUR_OTA_PASSWORD>"
