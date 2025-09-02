@@ -105,7 +105,7 @@ void setup() {
     
     // **FASE 2: CREACIÓN DE DEPENDENCIAS**
     DEBUG_PRINTLN("\n🔧 [SETUP] Creando dependencias del sistema...");
-    rtcInstance = new RTC_DS1302(RTC_RST, RTC_SCLK, RTC_IO);
+    rtcInstance = new RTC_DS1302(HardwareConfig::RTC_RST, HardwareConfig::RTC_SCLK, HardwareConfig::RTC_IO);
     statusLedInstance = new Led(LED);
     servoControllerInstance = new ServoPWMController(NUM_SERVOS);
     DEBUG_PRINTLN("✅ [SETUP] Dependencias creadas exitosamente.");

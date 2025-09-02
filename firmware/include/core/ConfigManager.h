@@ -21,6 +21,7 @@
 #include <SPIFFS.h>
 #include <stdint.h>
 #include <WString.h>
+#include <String.h> // Include String support
 
 // Número de zonas del sistema (configurable pero con máximo de 5)
 constexpr uint8_t MAX_ZONES = 5;
@@ -81,6 +82,7 @@ private:
     SystemConfig config;
     const char* configPath = "/config/system_config.json";
     const char* backupPath = "/config/backup/system_config.bak";
+    bool _firstBoot = true; // First boot flag
 
     ConfigManager(); // Constructor privado para singleton
 
@@ -95,6 +97,9 @@ public:
     // Eliminar copia y asignación para singleton
     ConfigManager(const ConfigManager&) = delete;
     ConfigManager& operator=(const ConfigManager&) = delete;
+
+    bool isFirstBoot() const;
+    void setFirstBoot(bool firstBoot);
 
     /**
      * @brief Obtiene la instancia singleton del ConfigManager.

@@ -35,11 +35,20 @@
 // Includes fundamentales
 // =============================================================================
 
-#include <Arduino.h>
-#include <HardwareSerial.h>
+#include <cstdint>  // For uint8_t, uint32_t etc
+#include <string>   // For std::string
+#include <cstdio>   // For printf
 
-// Asegurar declaración de Serial en contextos donde la inclusión aún no lo declare
-extern HardwareSerial Serial;
+// Serial interface abstraction
+class SerialInterface {
+public:
+    virtual void println(const char*) = 0;
+    virtual void print(const char*) = 0;
+    virtual void println(const std::string&) = 0;
+    virtual void print(const std::string&) = 0;
+};
+
+extern SerialInterface& Serial;  // Global serial interface reference
 
 // =============================================================================
 // CONFIGURACIÓN GENERAL DEL PROYECTO
@@ -222,9 +231,9 @@ namespace ServoConfig {
     // CONFIGURACIÓN DE SEGURIDAD Y LÍMITES
     // =====================================================================
     namespace Safety {
-        constexpr uint8_t MAX_RETRY_ATTEMPTS = 3;          // Número máximo de intentos de reposicionamiento
-        constexpr uint32_t STATUS_REPORT_INTERVAL = 5000;  // Intervalo de reporte de estado en ms
-        constexpr bool ENABLE_VERBOSE_LOGGING = true;      // Habilitar modo de diagnóstico detallado
+        constexpr uint8_t SERVO_RETRY_ATTEMPTS = 3;        // Número máximo de intentos de reposicionamiento de servos
+        constexpr uint32_t SERVO_STATUS_INTERVAL = 5000;   // Intervalo de reporte de estado de servos en ms
+        constexpr bool ENABLE_SERVO_VERBOSE = true;        // Habilitar modo de diagnóstico detallado para servos
         constexpr bool ENABLE_POSITION_FEEDBACK = false;   // Habilitar verificación de posición
     }
 }
@@ -328,7 +337,7 @@ namespace SensorConfig {
     // =====================================================================
     namespace Monitoring {
         constexpr uint32_t MEMORY_CHECK_INTERVAL = 30000;   // Verificar memoria cada 30 segundos
-        constexpr uint32_t STATUS_REPORT_INTERVAL = 60000;  // Reporte de estado cada 60 segundos
+        constexpr uint32_t SYSTEM_STATUS_INTERVAL = 60000;  // Reporte de estado del sistema cada 60 segundos
         constexpr uint32_t CRITICAL_MEMORY_THRESHOLD = 10000; // Memoria crítica en bytes
         constexpr uint32_t MIN_MEMORY_THRESHOLD = 5000;     // Memoria mínima antes de reinicio
     }
@@ -401,6 +410,11 @@ public:
      * 
      * @return true si toda la configuración es válida, false en caso contrario
      */
+    // Función de utilidad para repetir caracteres
+    static std::string repeatChar(char c, int times) {
+        return std::string(times, c);
+    }
+    
     static bool validateAllConfiguration() {
         bool allValid = true;
         
@@ -451,51 +465,51 @@ public:
      * completa de cómo está configurado el sistema.
      */
     static void printConfigurationSummary() {
-        Serial.println("\n" + String('=', 60));
+        Serial.println(("\n" + repeatChar('=', 60)).c_str());
         Serial.println("    RESUMEN DE CONFIGURACIÓN DEL PROYECTO");
-        Serial.println(String('=', 60));
+        Serial.println(repeatChar('=', 60).c_str());
         
         // Información del proyecto
         Serial.println("📋 INFORMACIÓN DEL PROYECTO:");
-        Serial.println("   • Nombre: " + String(ProjectInfo::PROJECT_NAME));
-        Serial.println("   • Versión: " + String(ProjectInfo::VERSION));
-        Serial.println("   • Compilado: " + String(ProjectInfo::BUILD_DATE) + " " + String(ProjectInfo::BUILD_TIME));
+        Serial.println(("   • Nombre: " + std::string(ProjectInfo::PROJECT_NAME)).c_str());
+        Serial.println(("   • Versión: " + std::string(ProjectInfo::VERSION)).c_str());
+        Serial.println(("   • Compilado: " + std::string(ProjectInfo::BUILD_DATE) + " " + std::string(ProjectInfo::BUILD_TIME)).c_str());
         
         // Configuración de hardware
         Serial.println("\n🔧 CONFIGURACIÓN DE HARDWARE:");
-        Serial.println("   • Pines RTC: " + String(HardwarePins::RTC::RST) + ", " + 
-                      String(HardwarePins::RTC::SCLK) + ", " + String(HardwarePins::RTC::IO));
-        Serial.println("   • LED de estado: GPIO " + String(HardwarePins::StatusLED::MAIN));
-        Serial.println("   • Servomotores: " + String(HardwarePins::Servos::COUNT) + " zonas configuradas");
-        Serial.println("   • Pines servos: " + String(HardwarePins::Servos::PINS[0]) + ", " + 
-                      String(HardwarePins::Servos::PINS[1]) + ", " + String(HardwarePins::Servos::PINS[2]) + ", " +
-                      String(HardwarePins::Servos::PINS[3]) + ", " + String(HardwarePins::Servos::PINS[4]));
+        Serial.println(("   • Pines RTC: " + std::to_string(HardwarePins::RTC::RST) + ", " + 
+                      std::to_string(HardwarePins::RTC::SCLK) + ", " + std::to_string(HardwarePins::RTC::IO)).c_str());
+        Serial.println(("   • LED de estado: GPIO " + std::to_string(HardwarePins::StatusLED::MAIN)).c_str());
+        Serial.println(("   • Servomotores: " + std::to_string(HardwarePins::Servos::COUNT) + " zonas configuradas").c_str());
+        Serial.println(("   • Pines servos: " + std::to_string(HardwarePins::Servos::PINS[0]) + ", " + 
+                      std::to_string(HardwarePins::Servos::PINS[1]) + ", " + std::to_string(HardwarePins::Servos::PINS[2]) + ", " +
+                      std::to_string(HardwarePins::Servos::PINS[3]) + ", " + std::to_string(HardwarePins::Servos::PINS[4])).c_str());
         
         // Configuración de riego
         Serial.println("\n💧 CONFIGURACIÓN DE RIEGO:");
-        Serial.println("   • Tiempo por zona: " + String(ServoConfig::Timing::DEFAULT_IRRIGATION_TIME) + " segundos");
-        Serial.println("   • Tiempo transición: " + String(ServoConfig::Timing::TRANSITION_TIME) + " segundos");
-        Serial.println("   • Ángulo cerrado: " + String(ServoConfig::Angles::CLOSED) + "°");
-        Serial.println("   • Ángulo abierto: " + String(ServoConfig::Angles::OPEN) + "°");
+        Serial.println(("   • Tiempo por zona: " + std::to_string(ServoConfig::Timing::DEFAULT_IRRIGATION_TIME) + " segundos").c_str());
+        Serial.println(("   • Tiempo transición: " + std::to_string(ServoConfig::Timing::TRANSITION_TIME) + " segundos").c_str());
+        Serial.println(("   • Ángulo cerrado: " + std::to_string(ServoConfig::Angles::CLOSED) + "°").c_str());
+        Serial.println(("   • Ángulo abierto: " + std::to_string(ServoConfig::Angles::OPEN) + "°").c_str());
         
         // Configuración de red
         Serial.println("\n🌐 CONFIGURACIÓN DE RED:");
-        Serial.println("   • Puerto servidor web: " + String(NetworkConfig::WebServer::PORT));
-        Serial.println("   • Timeout conexión WiFi: " + String(NetworkConfig::WiFi::CONNECTION_TIMEOUT / 1000) + " segundos");
-        Serial.println("   • WebSockets habilitados: " + String(NetworkConfig::WebServer::ENABLE_WEBSOCKETS ? "SÍ" : "NO"));
+        Serial.println(("   • Puerto servidor web: " + std::to_string(NetworkConfig::WebServer::PORT)).c_str());
+        Serial.println(("   • Timeout conexión WiFi: " + std::to_string(NetworkConfig::WiFi::CONNECTION_TIMEOUT / 1000) + " segundos").c_str());
+        Serial.println(("   • WebSockets habilitados: " + std::string(NetworkConfig::WebServer::ENABLE_WEBSOCKETS ? "SÍ" : "NO")).c_str());
         
         // Configuración de seguridad
         Serial.println("\n🛡️ CONFIGURACIÓN DE SEGURIDAD:");
-        Serial.println("   • Tamaño EEPROM: " + String(SecurityConfig::EEPROM::SIZE) + " bytes");
-        Serial.println("   • Errores máximos consecutivos: " + String(SystemSafety::MAX_CONSECUTIVE_ERRORS));
-        Serial.println("   • Timeout watchdog: " + String(SystemSafety::WATCHDOG_TIMEOUT / 1000) + " segundos");
+        Serial.println(("   • Tamaño EEPROM: " + std::to_string(SecurityConfig::EEPROM::SIZE) + " bytes").c_str());
+        Serial.println(("   • Errores máximos consecutivos: " + std::to_string(SystemSafety::MAX_CONSECUTIVE_ERRORS)).c_str());
+        Serial.println(("   • Timeout watchdog: " + std::to_string(SystemSafety::WATCHDOG_TIMEOUT / 1000) + " segundos").c_str());
         
         // Configuración de sensores
         Serial.println("\n📊 CONFIGURACIÓN DE SENSORES:");
-        Serial.println("   • Umbral humedad: " + String(SensorConfig::Humidity::DEFAULT_THRESHOLD) + "%");
-        Serial.println("   • Riego automático: " + String(SensorConfig::Humidity::ENABLE_AUTO_IRRIGATION ? "HABILITADO" : "DESHABILITADO"));
+        Serial.println(("   • Umbral humedad: " + std::to_string(SensorConfig::Humidity::DEFAULT_THRESHOLD) + "%").c_str());
+        Serial.println(("   • Riego automático: " + std::string(SensorConfig::Humidity::ENABLE_AUTO_IRRIGATION ? "HABILITADO" : "DESHABILITADO")).c_str());
         
-        Serial.println(String('=', 60) + "\n");
+        Serial.println((repeatChar('=', 60) + "\n").c_str());
     }
 
 private:
@@ -519,7 +533,7 @@ private:
             }
             
             if (!isValidPWM) {
-                Serial.println("[CONFIG ERROR] Pin servo " + String(i+1) + " (GPIO " + String(pin) + ") no es válido para PWM");
+                Serial.println(("[CONFIG ERROR] Pin servo " + std::to_string(i+1) + " (GPIO " + std::to_string(pin) + ") no es válido para PWM").c_str());
                 return false;
             }
         }
@@ -533,14 +547,14 @@ private:
             uint32_t time = ServoConfig::Timing::ZONE_TIMES[i];
             if (time < ServoConfig::Timing::MIN_IRRIGATION_TIME || 
                 time > ServoConfig::Timing::MAX_IRRIGATION_TIME) {
-                Serial.println("[CONFIG ERROR] Tiempo de riego zona " + String(i+1) + " fuera de rango: " + String(time) + "s");
+                Serial.println(("[CONFIG ERROR] Tiempo de riego zona " + std::to_string(i+1) + " fuera de rango: " + std::to_string(time) + "s").c_str());
                 return false;
             }
         }
         
         // Verificar configuración PWM
         if (ServoConfig::PWM::FREQUENCY < 20 || ServoConfig::PWM::FREQUENCY > 100) {
-            Serial.println("[CONFIG ERROR] Frecuencia PWM inválida: " + String(ServoConfig::PWM::FREQUENCY) + "Hz");
+            Serial.println(("[CONFIG ERROR] Frecuencia PWM inválida: " + std::to_string(ServoConfig::PWM::FREQUENCY) + "Hz").c_str());
             return false;
         }
         
@@ -550,12 +564,12 @@ private:
     static bool validateNetworkConfiguration() {
         // Verificar configuración de red
         if (NetworkConfig::WebServer::PORT < 1 || NetworkConfig::WebServer::PORT > 65535) {
-            Serial.println("[CONFIG ERROR] Puerto servidor web inválido: " + String(NetworkConfig::WebServer::PORT));
+            Serial.println(("[CONFIG ERROR] Puerto servidor web inválido: " + std::to_string(NetworkConfig::WebServer::PORT)).c_str());
             return false;
         }
         
         if (NetworkConfig::WiFi::CONNECTION_TIMEOUT < 5000) {
-            Serial.println("[CONFIG ERROR] Timeout WiFi muy corto: " + String(NetworkConfig::WiFi::CONNECTION_TIMEOUT) + "ms");
+            Serial.println(("[CONFIG ERROR] Timeout WiFi muy corto: " + std::to_string(NetworkConfig::WiFi::CONNECTION_TIMEOUT) + "ms").c_str());
             return false;
         }
         
@@ -565,12 +579,12 @@ private:
     static bool validateSecurityConfiguration() {
         // Verificar configuración de seguridad
         if (SecurityConfig::EEPROM::SIZE < 256) {
-            Serial.println("[CONFIG ERROR] Tamaño EEPROM muy pequeño: " + String(SecurityConfig::EEPROM::SIZE) + " bytes");
+            Serial.println(("[CONFIG ERROR] Tamaño EEPROM muy pequeño: " + std::to_string(SecurityConfig::EEPROM::SIZE) + " bytes").c_str());
             return false;
         }
         
         if (SystemSafety::MAX_CONSECUTIVE_ERRORS < 1) {
-            Serial.println("[CONFIG ERROR] Número de errores consecutivos inválido: " + String(SystemSafety::MAX_CONSECUTIVE_ERRORS));
+            Serial.println(("[CONFIG ERROR] Número de errores consecutivos inválido: " + std::to_string(SystemSafety::MAX_CONSECUTIVE_ERRORS)).c_str());
             return false;
         }
         
@@ -580,12 +594,12 @@ private:
     static bool validateSensorConfiguration() {
         // Verificar configuración de sensores
         if (SensorConfig::Humidity::DEFAULT_THRESHOLD > 100) {
-            Serial.println("[CONFIG ERROR] Umbral de humedad inválido: " + String(SensorConfig::Humidity::DEFAULT_THRESHOLD) + "%");
+            Serial.println(("[CONFIG ERROR] Umbral de humedad inválido: " + std::to_string(SensorConfig::Humidity::DEFAULT_THRESHOLD) + "%").c_str());
             return false;
         }
         
         if (SensorConfig::Monitoring::CRITICAL_MEMORY_THRESHOLD < 1000) {
-            Serial.println("[CONFIG ERROR] Umbral de memoria crítica muy bajo: " + String(SensorConfig::Monitoring::CRITICAL_MEMORY_THRESHOLD) + " bytes");
+            Serial.println(("[CONFIG ERROR] Umbral de memoria crítica muy bajo: " + std::to_string(SensorConfig::Monitoring::CRITICAL_MEMORY_THRESHOLD) + " bytes").c_str());
             return false;
         }
         
@@ -599,17 +613,15 @@ private:
 
 #include <stdio.h>
 
-#define DEBUG_PRINT(x) do { printf("%s", String(x).c_str()); } while(0)
-#define DEBUG_PRINTLN(x) do { printf("%s\n", String(x).c_str()); } while(0)
+#define DEBUG_PRINT(x) do { printf("%s", x); } while(0)
+#define DEBUG_PRINTLN(x) do { printf("%s\n", x); } while(0)
 #define DEBUG_PRINTF(format, ...) do { printf(format, ##__VA_ARGS__); } while(0)
-#define VERBOSE_PRINT(x) do { printf("%s", String(String("[VERBOSE] ") + String(x)).c_str()); } while(0)
-#define VERBOSE_PRINTLN(x) do { printf("%s\n", String(String("[VERBOSE] ") + String(x)).c_str()); } while(0)
+#define VERBOSE_PRINT(x) do { printf("[VERBOSE] %s", x); } while(0)
+#define VERBOSE_PRINTLN(x) do { printf("[VERBOSE] %s\n", x); } while(0)
 
 // Función de utilidad para repetir caracteres
-inline String repeatChar(char c, int times) {
-    String s = "";
-    for (int i = 0; i < times; ++i) s += c;
-    return s;
+inline std::string repeatChar(char c, int times) {
+    return std::string(times, c);
 }
 
 #endif // __PROJECT_CONFIG_H__

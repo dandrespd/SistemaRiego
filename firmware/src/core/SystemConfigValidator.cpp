@@ -1,5 +1,12 @@
 #include "../../include/core/SystemConfig.h"
-#include <Arduino.h>
+#include <stdio.h> // For printf instead of Serial
+#include <string> // For std::string
+#include "utils/Utils.h" // For repeatChar function
+
+// Simple logging function replacement
+void logMessage(const std::string& message) {
+    printf("%s\n", message.c_str());
+}
 
 bool SystemConfigValidator::validateSafetyLimits() {
     // Verificar que los límites de seguridad sean razonables
@@ -24,7 +31,7 @@ bool SystemConfigValidator::validateHardwareConfiguration() {
     if (HardwareConfig::NUM_SERVOS > 0) {
         for (int i = 0; i < HardwareConfig::NUM_SERVOS; i++) {
             if (HardwareConfig::SERVO_PINS[i] == 0) {
-                Serial.println("[CONFIG ERROR] Pin no definido para servo " + String(i));
+                logMessage("[CONFIG ERROR] Pin no definido para servo " + std::to_string(i));
                 valid = false;
             }
         }
@@ -32,7 +39,7 @@ bool SystemConfigValidator::validateHardwareConfiguration() {
     
     // Verificar pines RTC
     if (HardwareConfig::RTC_RST == 0 || HardwareConfig::RTC_SCLK == 0 || HardwareConfig::RTC_IO == 0) {
-        Serial.println("[CONFIG ERROR] Pines RTC no definidos correctamente");
+        logMessage("[CONFIG ERROR] Pines RTC no definidos correctamente");
         valid = false;
     }
     
@@ -44,57 +51,59 @@ bool SystemConfigValidator::validateAllConfiguration() {
     
     // Validar configuración de seguridad
     if (!validateSafetyLimits()) {
-        Serial.println("[CONFIG ERROR] Límites de seguridad inválidos");
+        logMessage("[CONFIG ERROR] Límites de seguridad inválidos");
         allValid = false;
     }
     
     // Validar configuración de red
     if (!validateNetworkSettings()) {
-        Serial.println("[CONFIG ERROR] Configuración de red inválida");
+        logMessage("[CONFIG ERROR] Configuración de red inválida");
         allValid = false;
     }
     
     // Validar configuración de hardware
     if (!validateHardwareConfiguration()) {
-        Serial.println("[CONFIG ERROR] Configuración de hardware inválida");
+        logMessage("[CONFIG ERROR] Configuración de hardware inválida");
         allValid = false;
     }
     
     if (allValid) {
-        Serial.println("[CONFIG OK] Toda la configuración del sistema es válida");
+        logMessage("[CONFIG OK] Toda la configuración del sistema es válida");
     } else {
-        Serial.println("[CONFIG ERROR] Se encontraron errores en la configuración");
+        logMessage("[CONFIG ERROR] Se encontraron errores en la configuración");
     }
     
     return allValid;
 }
 
 void SystemConfigValidator::printConfigurationSummary() {
-    Serial.println("\n" + String(repeatChar('=', 50)));
-    Serial.println("    RESUMEN DE CONFIGURACIÓN DEL SISTEMA");
-    Serial.println(String(repeatChar('=', 50)));
+    std::string divider(50, '=');
     
-    Serial.println("🔧 CONFIGURACIÓN DE DEBUG:");
-    Serial.println("   • Serial debugging: " + String(SystemDebug::ENABLE_SERIAL_DEBUGGING ? "HABILITADO" : "DESHABILITADO"));
-    Serial.println("   • Verbose logging: " + String(SystemDebug::ENABLE_VERBOSE_LOGGING ? "HABILITADO" : "DESHABILITADO"));
-    Serial.println("   • Baud rate: " + String(SystemDebug::SERIAL_BAUD_RATE));
+    logMessage("\n" + divider);
+    logMessage("    RESUMEN DE CONFIGURACIÓN DEL SISTEMA");
+    logMessage(divider);
     
-    Serial.println("\n🛡️ CONFIGURACIÓN DE SEGURIDAD:");
-    Serial.println("   • Tiempo máximo riego total: " + String(SystemSafety::MAX_TOTAL_IRRIGATION_TIME_MINUTES) + " minutos");
-    Serial.println("   • Timeout watchdog: " + String(SystemSafety::WATCHDOG_TIMEOUT_MS / 1000) + " segundos");
-    Serial.println("   • Errores máximos consecutivos: " + String(SystemSafety::MAX_CONSECUTIVE_ERRORS));
+    logMessage("🔧 CONFIGURACIÓN DE DEBUG:");
+    logMessage(std::string("   • Serial debugging: ") + (SystemDebug::ENABLE_SERIAL_DEBUGGING ? "HABILITADO" : "DESHABILITADO"));
+    logMessage(std::string("   • Verbose logging: ") + (SystemDebug::ENABLE_VERBOSE_LOGGING ? "HABILITADO" : "DESHABILITADO"));
+    logMessage("   • Baud rate: " + std::to_string(SystemDebug::SERIAL_BAUD_RATE));
     
-    Serial.println("\n🌐 CONFIGURACIÓN DE RED:");
-    Serial.println("   • Puerto servidor web: " + String(NetworkConfig::WEB_SERVER_PORT));
-    Serial.println("   • Timeout conexión WiFi: " + String(NetworkConfig::WIFI_CONNECTION_TIMEOUT_MS / 1000) + " segundos");
-    Serial.println("   • Máximo reintentos WiFi: " + String(NetworkConfig::MAX_WIFI_RETRY_ATTEMPTS));
+    logMessage("\n🛡️ CONFIGURACIÓN DE SEGURIDAD:");
+    logMessage("   • Tiempo máximo riego total: " + std::to_string(SystemSafety::MAX_TOTAL_IRRIGATION_TIME_MINUTES) + " minutos");
+    logMessage("   • Timeout watchdog: " + std::to_string(SystemSafety::WATCHDOG_TIMEOUT_MS / 1000) + " segundos");
+    logMessage("   • Errores máximos consecutivos: " + std::to_string(SystemSafety::MAX_CONSECUTIVE_ERRORS));
     
-    Serial.println("\n🔌 CONFIGURACIÓN OF HARDWARE:");
-    Serial.println("   • Número de servos: " + String(HardwareConfig::NUM_SERVOS));
-    Serial.println("   • Pines RTC: RST=" + String(HardwareConfig::RTC_RST) + 
-                  ", SCLK=" + String(HardwareConfig::RTC_SCLK) + 
-                  ", IO=" + String(HardwareConfig::RTC_IO));
-    Serial.println("   • LED de estado: Pin " + String(HardwareConfig::LED));
+    logMessage("\n🌐 CONFIGURACIÓN DE RED:");
+    logMessage("   • Puerto servidor web: " + std::to_string(NetworkConfig::WEB_SERVER_PORT));
+    logMessage("   • Timeout conexión WiFi: " + std::to_string(NetworkConfig::WIFI_CONNECTION_TIMEOUT_MS / 1000) + " segundos");
+    logMessage("   • Máximo reintentos WiFi: " + std::to_string(NetworkConfig::MAX_WIFI_RETRY_ATTEMPTS));
     
-    Serial.println(String(repeatChar('=', 50)) + "\n");
+    logMessage("\n🔌 CONFIGURACIÓN OF HARDWARE:");
+    logMessage("   • Número de servos: " + std::to_string(HardwareConfig::NUM_SERVOS));
+    logMessage("   • Pines RTC: RST=" + std::to_string(HardwareConfig::RTC_RST) +
+        ", SCLK=" + std::to_string(HardwareConfig::RTC_SCLK) +
+        ", IO=" + std::to_string(HardwareConfig::RTC_IO));
+    logMessage("   • LED de estado: Pin " + std::to_string(HardwareConfig::LED));
+    
+    logMessage(divider + "\n");
 }

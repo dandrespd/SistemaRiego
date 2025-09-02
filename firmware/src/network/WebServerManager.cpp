@@ -11,16 +11,19 @@
  * @date 2025
  */
 
+#include <cstdint>
 #include "network/WebServerManager.h"
 #include "core/SystemManager.h"
 #include "core/EventBus.h"
 #include "utils/Logger.h"
 #include "drivers/ServoPWMController.h"
 #include "core/ConfigManager.h"
+#include "core/SystemConfig.h"
 #include <SPIFFS.h>
 #include <ESPmDNS.h>
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
+#include <WiFi.h>
 
 /**
  * @brief Autenticar una solicitud HTTP
@@ -32,13 +35,28 @@ bool WebServerManager::authenticateRequest(AsyncWebServerRequest *request) {
     if (!SecurityConfig::ENABLE_WEB_AUTHENTICATION) {
         return true;
     }
-    
-    // Verificar si la solicitud ya está autenticada
+
+    // Permitir acceso público al endpoint de estado
+    if (request->url() == "/api/v1/status") {
+        return true;
+    }
+
+    // Requerir autenticación para todos los endpoints de configuración
+    if (request->url().startsWith("/api/config")) {
+        if (!request->authenticate(SecurityConfig::DEFAULT_WEB_USERNAME, SecurityConfig::DEFAULT_WEB_PASSWORD)) {
+            LOG_WARNING("[WEBSERVER] Intento de acceso no autenticado a configuración desde: " + 
+                       request->client()->remoteIP().toString());
+            request->requestAuthentication();
+            return false;
+        }
+        return true;
+    }
+
+    // Comportamiento por defecto para otros endpoints
     if (request->authenticate(SecurityConfig::DEFAULT_WEB_USERNAME, SecurityConfig::DEFAULT_WEB_PASSWORD)) {
         return true;
     }
     
-    // Si no está autenticada, solicitar credenciales
     LOG_WARNING("[WEBSERVER] Intento de acceso no autenticado desde: " + request->client()->remoteIP().toString());
     request->requestAuthentication();
     return false;
@@ -105,9 +123,9 @@ void WebServerManager::setupStaticFiles() {
 void WebServerManager::setupRESTEndpoints() {
     LOG_INFO("[WEBSERVER] Configurando endpoints REST...");
     
-    // Endpoint de estado del sistema
-    server->on("/api/status", HTTP_GET, [this](AsyncWebServerRequest *request){
-        LOG_DEBUG("[WEBSERVER] Petición de estado desde: " + request->client()->remoteIP().toString());
+    // Endpoint de estado del sistema (público)
+    server->on("/api/v1/status", HTTP_GET, [this](AsyncWebServerRequest *request){
+        LOG_DEBUG("[WEBSERVER] Petición de estado público desde: " + request->client()->remoteIP().toString());
         
         if (!systemManager) {
             request->send(503, "application/json", "{\"error\":\"Sistema no inicializado\"}");
