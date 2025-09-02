@@ -1,51 +1,16 @@
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
 # PlatformIO
 .pio/
 .pioenvs/
-.piolibdeps/
+pioenvs/
 
 # Node
-web/node_modules/
-web/.next/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+/web/node_modules/
+/web/.next/
+/web/out/
 
-# Build files
-build/
-dist/
-out/
+# Local configs
+/firmware/config.local.h
 
-# System files
-.DS_Store
-Thumbs.db
-
-# Serial ports
-COM*
-/dev/*
-
-# Local config and keys
-firmware/config.local.h
-*.pem
-*.key
+# Logs / temp
+tmp/
 C_/
-
-# Environment files
-.env
-*.env.local
-
-# Debug logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-
-# Local development files
-local.*
