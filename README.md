@@ -45,6 +45,23 @@ cd firmware
 pio run -t upload
 ```
 
+## Deployment to ESP32
+To deploy the web application to your ESP32 device:
+1. Create a `.env` file in the `web` directory (use the template):
+   ```bash
+   cp web/.env.example web/.env
+   ```
+2. Edit `web/.env` with your ESP32's IP address and settings
+3. Build the web application:
+   ```bash
+   cd web
+   pnpm run build
+   ```
+4. Run the deployment script:
+   ```bash
+   node scripts/deploy-to-esp32.js
+   ```
+
 ## First Boot Process
 On first boot, you'll be guided to:
 1. Connect to WiFi
