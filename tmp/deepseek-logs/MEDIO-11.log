@@ -1,0 +1,22 @@
+Verified authentication requirements at 2025-09-02 18:20:00
+
+[✓] All configuration-changing endpoints are protected:
+    - POST /api/config/rtc
+    - GET /api/config
+    - PUT /api/config
+    - GET /api/config/defaults
+    - POST /api/config/reset
+    - GET /api/config/backup
+    - POST /api/config/backup
+    - POST /api/config/backup/restore
+
+[✓] Status endpoint remains publicly accessible:
+    - GET /api/v1/status
+
+[✓] Authentication logic in WebServerManager::authenticateRequest() is correctly implemented:
+    - Web authentication can be disabled via configuration
+    - Configuration endpoints (/api/config*) require authentication
+    - Status endpoint is excluded from authentication
+    - Other endpoints require authentication by default
+
+No code changes required - authentication requirements are already properly implemented.
