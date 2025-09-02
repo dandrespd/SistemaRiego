@@ -21,6 +21,7 @@
 // Includes necesarios
 // =============================================================================
 #include <Arduino.h>
+#include <stdint.h> // For uint8_t type
 
 // =============================================================================
 // Configuración de Pines por Módulos
@@ -29,9 +30,7 @@
 // -------------------------------------------------------------------------
 // Pines del RTC (DS1302) - Real Time Clock
 // -------------------------------------------------------------------------
-constexpr uint8_t RTC_RST = 17;     // Pin RST (Reset) del módulo RTC DS1302
-constexpr uint8_t RTC_SCLK = 18;    // Pin SCLK (Serial Clock) del módulo RTC
-constexpr uint8_t RTC_IO = 19;      // Pin IO (Input/Output Data) del módulo RTC
+// Consolidated into SystemConfig.h - use HardwareConfig::RTC_RST etc.
 
 // -------------------------------------------------------------------------
 // LED de Estado del Sistema
@@ -45,7 +44,7 @@ constexpr uint8_t LED = 16;         // LED externo para indicadores de estado
 // Entradas y Salidas Digitales Básicas
 // -------------------------------------------------------------------------
 constexpr uint8_t IN_DIGITAL = 4;  // Entrada digital para sensor de humedad básico
-constexpr uint8_t OUT_DIGITAL = 21; // Salida digital para control de válvula principal
+// OUT_DIGITAL consolidated into SystemConfig.h - use HardwareConfig::OUT_DIGITAL
 
 // -------------------------------------------------------------------------
 // Pines de Servomotores PWM (Sistema de Riego Multi-Zona)

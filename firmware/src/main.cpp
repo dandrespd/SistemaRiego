@@ -105,7 +105,7 @@ void setup() {
     
     // **FASE 2: CREACIÓN DE DEPENDENCIAS**
     DEBUG_PRINTLN("\n🔧 [SETUP] Creando dependencias del sistema...");
-    rtcInstance = new RTC_DS1302(RTC_RST, RTC_SCLK, RTC_IO);
+    rtcInstance = new RTC_DS1302(HardwareConfig::RTC_RST, HardwareConfig::RTC_SCLK, HardwareConfig::RTC_IO);
     statusLedInstance = new Led(LED);
     servoControllerInstance = new ServoPWMController(NUM_SERVOS);
     DEBUG_PRINTLN("✅ [SETUP] Dependencias creadas exitosamente.");
@@ -133,8 +133,10 @@ void setup() {
     // **FASE 4.5: CONFIGURACIÓN DE ACTUALIZACIONES OTA**
     DEBUG_PRINTLN("\n📡 [SETUP] Configurando actualizaciones OTA...");
     
-    // Configurar OTA con hostname y sin contraseña por defecto
+    // Configurar OTA con hostname y contraseña segura
+    #include "config.local.h" // define OTA_PASSWORD_LOCAL
     ArduinoOTA.setHostname("riego-inteligente");
+    ArduinoOTA.setPassword(OTA_PASSWORD_LOCAL);
     
     // Configurar callbacks de OTA para feedback
     ArduinoOTA.onStart([]() {

@@ -79,8 +79,10 @@ namespace RTCConfig {
  */
 namespace SecurityConfig {
     constexpr bool ENABLE_WEB_AUTHENTICATION = true;         // Habilitar autenticación web
-    constexpr const char* DEFAULT_WEB_USERNAME = "admin";     // Usuario por defecto
-    constexpr const char* DEFAULT_WEB_PASSWORD = "riego2025secure"; // Contraseña por defecto
+    // Removed default credentials to force change on first boot
+    // Temporary credentials generated on first boot
+    static char* DEFAULT_WEB_USERNAME = nullptr;
+    static char* DEFAULT_WEB_PASSWORD = nullptr;
     constexpr const char* OTA_PASSWORD = "riego2025secure";   // Contraseña para actualizaciones OTA
     constexpr uint32_t SESSION_TIMEOUT_MS = 3600000;         // Timeout de sesión 1 hora
     constexpr uint8_t MAX_LOGIN_ATTEMPTS = 5;               // Máximo intentos de login
@@ -95,10 +97,10 @@ namespace SecurityConfig {
  * @brief Configuración de pines GPIO para el sistema de riego.
  */
 namespace HardwareConfig {
-    // Pines para RTC DS1302
-    constexpr uint8_t RTC_RST = 25;
-    constexpr uint8_t RTC_SCLK = 26;
-    constexpr uint8_t RTC_IO = 32;  // Cambiado de 27 a 32 para evitar conflicto con servo
+    // Pines para RTC DS1302 (consolidated from SET_PIN.h)
+    constexpr uint8_t RTC_RST = 25;      // Pin RST (Reset) del módulo RTC DS1302
+    constexpr uint8_t RTC_SCLK = 26;     // Pin SCLK (Serial Clock) del módulo RTC
+    constexpr uint8_t RTC_IO = 32;       // Pin IO (Input/Output Data) del módulo RTC
     
     // Pines para servomotores (válvulas de riego)
     constexpr uint8_t SERVO_PINS[] = {13, 12, 14, 33, 15};  // Eliminado pin 27, agregado 15
@@ -111,8 +113,8 @@ namespace HardwareConfig {
     // Pin para sensor de humedad (entrada digital)
     constexpr uint8_t IN_DIGITAL = 34;
     
-    // Pines para salidas digitales adicionales
-    constexpr uint8_t OUT_DIGITAL = 4;
+    // Pines para salidas digitales adicionales (consolidated from SET_PIN.h)
+    constexpr uint8_t OUT_DIGITAL = 4;   // Salida digital para control de válvula principal
 }
 
 /**
@@ -132,8 +134,8 @@ namespace ServoConfig {
  * @brief Configuración de zonas de riego por defecto.
  */
 namespace ZoneTimingConfig {
-    constexpr uint32_t MIN_IRRIGATION_TIME_SECONDS = 60;    // Mínimo 60 segundos por zona (consistente con SERVO_CONFIG)
-    constexpr uint32_t MAX_IRRIGATION_TIME_SECONDS = 1800; // Máximo 30 minutos por zona (consistente con SERVO_CONFIG)
+    constexpr uint32_t MIN_IRRIGATION_TIME_SECONDS = 60;    // Mínimo 60 segundos por zona
+    constexpr uint32_t MAX_IRRIGATION_TIME_SECONDS = 1800;  // Máximo 30 minutos por zona (unificado de ServoConfig.h)
     constexpr uint32_t TRANSITION_TIME_SECONDS = 10;       // 10 segundos entre zonas (consistente con SERVO_CONFIG)
     constexpr uint32_t STATUS_REPORT_INTERVAL_MS = 5000;  // Reporte cada 5 segundos
 }
