@@ -1,0 +1,36 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build_web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          
+      - name: Install pnpm
+        run: npm install -g pnpm
+          
+      - name: Install web dependencies
+        run: cd web && pnpm install
+        
+      - name: Build web application
+        run: cd web && pnpm run build
+        
+  build_firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install PlatformIO
+        run: pip install platformio
+          
+      - name: Build firmware
+        run: cd firmware && pio run
