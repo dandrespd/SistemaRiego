@@ -92,8 +92,8 @@ class IrrigationAPI {
   private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
     // Normalize endpoint to /api/<version>/<path-without-leading-slash>
     const path = endpoint.replace(/^\/+|\/+$/g, '') // trim slashes
-    // if endpoint already contains "api/" at beginning, remove it
-    const clean = path.replace(/^api\/+/i, '')
+    // if endpoint already contains "api/" or "api/v..." at beginning, remove it
+    const clean = path.replace(/^api\/(?:v\d+\/)?/i, "")
     const normalizedEndpoint = `/api/${this.apiVersion}/${clean}`
     const url = `${this.baseUrl}${normalizedEndpoint}`
 
