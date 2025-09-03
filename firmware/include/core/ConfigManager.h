@@ -16,12 +16,9 @@
  * @date 2025
  */
 
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include <SPIFFS.h>
-#include <stdint.h>
-#include <WString.h>
-#include <String.h> // Include String support
+#include <Arduino.h>  // For basic Arduino functionality
+#include <stdint.h>   // For standard integer types
+#include <WString.h>  // For String class - required for SystemConfig
 
 // Número de zonas del sistema (configurable pero con máximo de 5)
 constexpr uint8_t MAX_ZONES = 5;
