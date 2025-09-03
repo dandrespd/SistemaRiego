@@ -1,51 +1,30 @@
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# PlatformIO
+# .gitignore — Projecta PlatformIO + Node
+# PlatformIO artifacts
 .pio/
 .pioenvs/
 .piolibdeps/
-
-# Node
-web/node_modules/
-web/.next/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build files
-build/
-dist/
-out/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Serial ports
-COM*
-/dev/*
-
-# Local config and keys
-firmware/config.local.h
+*.pio*
+*.bin
+*.elf
+# VSCode and IDE
+.vscode/
+.idea/
+# PlatformIO generated
+.platformio/
+# Node modules
+/web/node_modules/
+/node_modules/
+# Build artifacts from web
+/web/build/
+/web/dist/
+/dist/
+/build/
+# Secrets and credentials
+secrets.ini
 *.pem
 *.key
-C_/
-
-# Environment files
-.env
-*.env.local
-
-# Debug logs
+# OS files
+.DS_Store
+Thumbs.db
+# Logs
 *.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-
-# Local development files
-local.*
