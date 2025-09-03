@@ -1,196 +1,68 @@
-#ifndef __SYSTEM_CONFIG_H__
-#define __SYSTEM_CONFIG_H__
+// SystemConfig.h  — Single source of truth for hardware pin mapping
+// Generated/updated by DeepSeek agent: apply carefully and run tests.
+// Sections: BOOT SAFETY | I2C & DISPLAY | RTC (DS1302) | ANALOG SENSORS (ADC1) |
+//           DIGITAL SENSORS | RELAYS | SERVOS (PWM) | UTIL / NOTES
+// IMPORTANT: Do not use strapping pins (0,2,5,12,15) or flash pins (6..11).
+// See Espressif docs for ADC and strapping pins.
 
-/**
- * @file SystemConfig.h
- * @brief Configuración centralizada y consolidada para todo el sistema de riego.
- * 
- * **PRINCIPIO DE RESPONSABILIDAD ÚNICA**:
- * Tener un lugar central para toda la configuración del sistema reduce errores,
- * facilita el mantenimiento y mejora la legibilidad.
- * 
- * **BENEFICIOS DE ESTA ARQUITECTURA**:
- * 1. Configuración centralizada evita inconsistencias
- * 2. Fácil modificación de parámetros sin buscar en múltiples archivos
- * 3. Validación de configuración en un solo lugar
- * 4. Documentación consolidada de todos los parámetros del sistema
- * 
- * @author Sistema de Riego Inteligente  
- * @version 3.1 - Arquitectura mejorada con principios SOLID
- * @date 2025
- */
+#pragma once
+#include <stdint.h>
 
-// =============================================================================
-// Includes fundamentales
-// =============================================================================
-
-#include <stdint.h> // Para tipos enteros estándar
-#include <Arduino.h>
-#include "Utils.h"
-
-// =============================================================================
-// CONFIGURACIÓN GENERAL DEL SISTEMA
-// =============================================================================
-
-/**
- * @brief Configuración de debugging y monitoreo del sistema.
- */
-namespace SystemDebug {
-    constexpr bool ENABLE_SERIAL_DEBUGGING = true;      // Habilitar mensajes serie
-    constexpr bool ENABLE_VERBOSE_LOGGING = true;       // Logging detallado
-    constexpr bool ENABLE_PERFORMANCE_MONITORING = false; // Monitoreo de rendimiento
-    constexpr bool ENABLE_MEMORY_MONITORING = false;    // Monitoreo de memoria
-    constexpr uint32_t SERIAL_BAUD_RATE = 115200;      // Velocidad comunicación serie
-}
-
-/**
- * @brief Configuración de seguridad y límites críticos del sistema.
- */
-namespace SystemSafety {
-    constexpr uint32_t MAX_TOTAL_IRRIGATION_TIME_MINUTES = 180;  // 3 horas máximo total
-    constexpr uint32_t MIN_PRESSURE_STABILIZATION_TIME_MS = 2000; // Estabilización presión
-    constexpr uint32_t WATCHDOG_TIMEOUT_MS = 30000;             // Timeout watchdog 30s
-    constexpr uint8_t MAX_CONSECUTIVE_ERRORS = 5;               // Errores antes de parada
-    constexpr uint32_t EMERGENCY_STOP_TIMEOUT_MS = 1000;       // Timeout parada emergencia
-}
-
-/**
- * @brief Configuración de red y conectividad.
- */
-namespace NetworkConfig {
-    constexpr uint32_t WIFI_CONNECTION_TIMEOUT_MS = 30000;     // 30s para conectar WiFi
-    constexpr uint32_t WIFI_RETRY_INTERVAL_MS = 5000;         // Reintentar cada 5s
-    constexpr uint8_t MAX_WIFI_RETRY_ATTEMPTS = 10;           // Máximo 10 reintentos
-    constexpr uint16_t WEB_SERVER_PORT = 80;                  // Puerto servidor web
-    constexpr uint32_t WEB_REQUEST_TIMEOUT_MS = 5000;         // Timeout peticiones web
-    constexpr uint32_t NTP_UPDATE_INTERVAL_MS = 3600000;      // Actualizar NTP cada 1 hora
-    constexpr uint32_t NTP_TIMEOUT_MS = 5000;                 // Timeout para NTP
-}
-
-namespace RTCConfig {
-    constexpr bool AUTO_SYNC_WITH_NTP = true;                // Sincronizar automáticamente con NTP
-    constexpr const char* NTP_SERVER = "pool.ntp.org";        // Servidor NTP por defecto
-    constexpr int TIMEZONE_OFFSET = -5;                      // Offset de zona horaria (UTC-5 para Bogotá)
-    constexpr bool DAYLIGHT_SAVING = false;                   // No usar horario de verano
-}
-
-/**
- * @brief Configuración de seguridad y autenticación.
- */
-namespace SecurityConfig {
-    constexpr bool ENABLE_WEB_AUTHENTICATION = true;         // Habilitar autenticación web
-    // Removed default credentials to force change on first boot
-    // Temporary credentials generated on first boot
-    static char* DEFAULT_WEB_USERNAME = nullptr;
-    static char* DEFAULT_WEB_PASSWORD = nullptr;
-    constexpr const char* OTA_PASSWORD = "riego2025secure";   // Contraseña para actualizaciones OTA
-    constexpr uint32_t SESSION_TIMEOUT_MS = 3600000;         // Timeout de sesión 1 hora
-    constexpr uint8_t MAX_LOGIN_ATTEMPTS = 5;               // Máximo intentos de login
-    constexpr uint32_t LOGIN_COOLDOWN_MS = 300000;          // Enfriamiento después de intentos fallidos (5 minutos)
-}
-
-// =============================================================================
-// CONFIGURACIÓN DE HARDWARE - PINES Y PERIFÉRICOS
-// =============================================================================
-
-/**
- * @brief Configuración de pines GPIO para el sistema de riego.
- */
 namespace HardwareConfig {
-    // Pines para RTC DS1302 (consolidated from SET_PIN.h)
-    constexpr uint8_t RTC_RST = 25;      // Pin RST (Reset) del módulo RTC DS1302
-    constexpr uint8_t RTC_SCLK = 26;     // Pin SCLK (Serial Clock) del módulo RTC
-    constexpr uint8_t RTC_IO = 32;       // Pin IO (Input/Output Data) del módulo RTC
-    
-    // Pines para servomotores (válvulas de riego)
-    constexpr uint8_t SERVO_PINS[] = {13, 12, 14, 33, 15};  // Eliminado pin 27, agregado 15
-    constexpr uint8_t NUM_SERVOS = 5;
-    constexpr uint8_t SERVO_PIN = SERVO_PINS[0]; // Pin por defecto para servo principal
-    
-    // Pin para LED de estado
-    constexpr uint8_t LED = 2;
-    
-    // Pin para sensor de humedad (entrada digital)
-    constexpr uint8_t IN_DIGITAL = 34;
-    
-    // Pines para salidas digitales adicionales (consolidated from SET_PIN.h)
-    constexpr uint8_t OUT_DIGITAL = 4;   // Salida digital para control de válvula principal
-}
 
-/**
- * @brief Configuración específica de servomotores.
- */
-namespace ServoConfig {
-    constexpr uint32_t PWM_FREQUENCY = 50;           // 50 Hz para servos estándar
-    constexpr uint8_t PWM_RESOLUTION = 12;           // 12 bits de resolución (4096 pasos)
-    constexpr uint32_t PWM_MIN_PULSE = 205;          // 1ms para 0° (4096 * 1/20)
-    constexpr uint32_t PWM_MAX_PULSE = 410;          // 2ms para 180° (4096 * 2/20)
-    constexpr uint8_t SERVO_CLOSED_ANGLE = 0;        // Ángulo para válvula cerrada
-    constexpr uint32_t SERVO_MOVEMENT_TIME_MS = 1000; // Tiempo movimiento servo
-    constexpr uint8_t MAX_SERVO_RETRY_ATTEMPTS = 3;  // Máximo intentos de reposicionamiento
-}
+  // ---------- BOOT / RESERVED (notes) ----------
+  // Avoid: GPIO0, GPIO2, GPIO5, GPIO12, GPIO15 (strapping pins)
+  // Avoid: GPIO6..GPIO11 (flash/PSRAM)
+  // Keep UART0 (TX0/RX0 = GPIO1/GPIO3) free if you rely on Serial monitor.
 
-/**
- * @brief Configuración de zonas de riego por defecto.
- */
-namespace ZoneTimingConfig {
-    constexpr uint32_t MIN_IRRIGATION_TIME_SECONDS = 60;    // Mínimo 60 segundos por zona
-    constexpr uint32_t MAX_IRRIGATION_TIME_SECONDS = 1800;  // Máximo 30 minutos por zona (unificado de ServoConfig.h)
-    constexpr uint32_t TRANSITION_TIME_SECONDS = 10;       // 10 segundos entre zonas (consistente con SERVO_CONFIG)
-    constexpr uint32_t STATUS_REPORT_INTERVAL_MS = 5000;  // Reporte cada 5 segundos
-}
+  // ---------- I2C (common) ----------
+  // Default I2C pins on many ESP32 devkits (can be remapped explicitly with Wire.begin)
+  constexpr uint8_t I2C_SDA = 21; // Default SDA — typical on DOIT DEVKIT V1
+  constexpr uint8_t I2C_SCL = 22; // Default SCL — typical on DOIT DEVKIT V1
+  // LCD: I2C module (PCF8574/expander). Typical addresses: 0x27 or 0x3F — run scanner to confirm.
+  constexpr uint8_t LCD_I2C_ADDR = 0x3F; // default guess; use I2C scanner in tests
 
-// =============================================================================
-// VALIDACIÓN AUTOMÁTICA DE CONFIGURACIÓN
-// =============================================================================
+  // ---------- RTC: DS1302 (3-wire: CE / SCLK / IO) ----------
+  // DS1302 is NOT I2C. IO must be bidirectional (do NOT place on input-only pins 34..39).
+  // We pick bidirectional non-strap pins to be safe.
+  constexpr uint8_t RTC_CE   = 23; // Chip Enable (digital output)
+  constexpr uint8_t RTC_SCLK = 19; // Serial clock (digital output)
+  constexpr uint8_t RTC_IO   = 18; // Bidirectional data (digital I/O)
 
-/**
- * @class SystemConfigValidator
- * @brief Clase utilitaria para validar la configuración del sistema.
- * 
- * Nota: La implementación completa se encuentra en SystemConfigValidator.cpp
- * para evitar problemas de inclusión y dependencias.
- */
-class SystemConfigValidator {
-public:
-    /**
-     * @brief Valida toda la configuración del sistema.
-     * @return true si toda la configuración es válida, false en caso contrario
-     */
-    static bool validateAllConfiguration();
-    
-    /**
-     * @brief Imprime un resumen completo de la configuración actual.
-     */
-    static void printConfigurationSummary();
+  // ---------- ANALOG SENSORS (use ADC1 pins only; ADC2 unreliable with Wi-Fi) ----------
+  // ADC1: GPIO32..GPIO39 are safe for analog with Wi-Fi active. (See docs).
+  // Mapping chosen to preserve ADC1 channels and to use input-only pins for raw sensors.
+  constexpr uint8_t SOIL_MOISTURE_1 = 34; // ADC1_CH6 — input-only (no internal pullup)
+  constexpr uint8_t SOIL_MOISTURE_2 = 35; // ADC1_CH7 — input-only (no internal pullup)
+  constexpr uint8_t BATTERY_VOLTAGE = 32; // ADC1_CH4 — use voltage divider
+  constexpr uint8_t LIGHT_SENSOR     = 33; // ADC1_CH5 — optional
 
-private:
-    static bool validateSafetyLimits();
-    static bool validateNetworkSettings();
-    static bool validateHardwareConfiguration();
-};
+  // ---------- DIGITAL SENSORS (float switches / reed) ----------
+  // Input-only pins (34..39) have NO internal pull-ups — use external resistors if chosen.
+  // Alternatively use GPIOs with internal pull-ups (e.g. 13,14,25,26,27) if you prefer.
+  // Default: use input-only pins + external pull-ups to reduce chance of accidental driving.
+  constexpr uint8_t FLOAT_LEVEL_1 = 36; // input-only (use external pull-up ~10k)
+  constexpr uint8_t FLOAT_LEVEL_2 = 39; // input-only (use external pull-up ~10k)
 
-// =============================================================================
-// MACROS DE UTILIDAD PARA DEBUGGING
-// =============================================================================
+  // ---------- RELAYS / ACTUATORS (digital outputs; use transistors/driver if required) ----------
+  // Choose pins that are non-strap and free. Use active HIGH (or invert in code if relay is active low).
+  constexpr uint8_t RELAY_VALVE_MAIN = 4;  // Valve main control — safe, non-strap pin
+  constexpr uint8_t RELAY_PUMP       = 13; // Pump control — safe, has internal pull-up capability
+  constexpr uint8_t RELAY_AUX        = 27; // Auxiliary relay — avoid ADC2 analog reads during Wi-Fi if used as ADC
 
-#include <stdio.h>
+  // ---------- SERVOS (PWM via LEDC) ----------
+  // Use non-input-only pins. Provide up to 4 PWM outputs here (extend with alternatives if needed).
+  constexpr uint8_t SERVO_PINS[] = {25, 26, 14, 33}; // 25/26/14/33 — all support PWM (33 is also ADC1_CH5)
+  constexpr uint8_t NUM_SERVOS = sizeof(SERVO_PINS)/sizeof(SERVO_PINS[0]);
 
-#define DEBUG_PRINT(x) do { if (SystemDebug::ENABLE_SERIAL_DEBUGGING) { printf("%s", String(x).c_str()); } } while(0)
-#define DEBUG_PRINTLN(x) do { if (SystemDebug::ENABLE_SERIAL_DEBUGGING) { printf("%s\n", String(x).c_str()); } } while(0)
-#define DEBUG_PRINTF(format, ...) do { if (SystemDebug::ENABLE_SERIAL_DEBUGGING) { printf(format, ##__VA_ARGS__); } } while(0)
-#define VERBOSE_PRINT(x) do { if (SystemDebug::ENABLE_VERBOSE_LOGGING) { printf("%s", String(String("[VERBOSE] ") + String(x)).c_str()); } } while(0)
-#define VERBOSE_PRINTLN(x) do { if (SystemDebug::ENABLE_VERBOSE_LOGGING) { printf("%s\n", String(String("[VERBOSE] ") + String(x)).c_str()); } } while(0)
+  // ---------- DEBUG / COMMUNICATION ----------
+  // Leave UART0 (GPIO1 TX0 / GPIO3 RX0) free for Serial monitor debugging.
+  // If you need a second UART, use Serial1/Serial2 and map to safe pins.
 
-// =============================================================================
-// INFORMACIÓN DE VERSION Y BUILD
-// =============================================================================
+  // ---------- HARDWARE NOTES ----------
+  // - Input-only pins (34..39) have NO internal pull-ups/pull-downs — add external resistors.
+  // - Avoid reassigning strapping pins or flash pins; check hardware wiring before flashing.
+  // - When changing pin assignments, update any legacy SET_PIN.h to include this header and map old names.
+  // - After updating, run the I2C scanner and analog-read tests described in README/tests.
 
-namespace SystemInfo {
-    constexpr const char* VERSION = "3.2.0";  // Updated version to reflect enhancements
-    constexpr const char* BUILD_DATE = __DATE__;
-    constexpr const char* BUILD_TIME = __TIME__;
-    constexpr const char* COMPILER_VERSION = __VERSION__;
-}
-
-#endif // __SYSTEM_CONFIG_H__
+} // namespace HardwareConfig
