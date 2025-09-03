@@ -21,7 +21,14 @@ If you encounter "pnpm command not found" errors:
    cd SistemaRiego
    ```
 
-2. Setup web application:
+2. Setup environment variables:
+   ```bash
+   cd web
+   cp .env.example .env
+   # Edit .env file with your ESP32 details
+   ```
+   
+3. Setup web application:
    ```bash
    cd web
    pnpm install

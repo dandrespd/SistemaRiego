@@ -264,7 +264,6 @@ namespace NetworkConfig {
     namespace WiFi {
         constexpr uint32_t CONNECTION_TIMEOUT = 30000;     // 30 segundos timeout de conexión
         constexpr uint32_t RETRY_INTERVAL = 5000;          // Reintentar cada 5 segundos
-        constexpr uint8_t MAX_RETRY_ATTEMPTS = 10;         // Máximo 10 reintentos
         constexpr int8_t MIN_SIGNAL_STRENGTH = -80;        // Mínima señal aceptable (dBm)
         constexpr bool ENABLE_AUTO_RECONNECT = true;       // Reconectar automáticamente
         constexpr bool ENABLE_AP_FALLBACK = true;          // Activar AP si falla conexión
@@ -379,6 +378,7 @@ namespace DebugConfig {
  * @brief Configuración de seguridad y límites críticos del sistema.
  */
 namespace SystemSafety {
+    constexpr uint8_t MAX_RETRY_ATTEMPTS = 3;            // Máximo 3 reintentos
     constexpr uint32_t MAX_TOTAL_IRRIGATION_TIME = 180;     // 3 horas máximo total de riego
     constexpr uint32_t MIN_PRESSURE_STABILIZATION = 2000;   // Estabilización presión en ms
     constexpr uint32_t WATCHDOG_TIMEOUT = 30000;            // Timeout watchdog 30s
