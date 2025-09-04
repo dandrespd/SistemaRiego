@@ -45,6 +45,7 @@
 #include "drivers/ServoPWMController.h"  // Controlador de servo multi-zona con PWM nativo ESP32
 #include "drivers/RTC_DS1302.h" // RTC DS1302
 #include "drivers/Led.h"        // Control de LED
+#include "drivers/I2CManager.h" // I2C Management
 
 // OTA Updates
 #include <ArduinoOTA.h>
@@ -94,6 +95,8 @@ SystemManager* sistemaRiego = nullptr;
 void setup() {
     // **FASE 1: COMUNICACIÓN Y LOGGING**
     Serial.begin(SystemDebug::SERIAL_BAUD_RATE);
+    // Initialize I2C (SDA/SCL as defined in SystemConfig) and mutex
+    Drivers::I2CManager::begin();
     delay(2000); // Estabilización del puerto serie
     
     // **BANNER DE INICIO EDUCATIVO**
