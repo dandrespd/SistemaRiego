@@ -148,6 +148,9 @@ bool SystemManager::initialize() {
 void SystemManager::update() {
     unsigned long currentTime = millis();
     
+    // Handle WiFi reconnection (applies to all states)
+    handleWiFiReconnection();
+    
     // **ACTUALIZACIÓN PRINCIPAL SEGÚN ESTADO**
     switch (currentState) {
         case SystemState::INITIALIZING:
@@ -207,10 +210,42 @@ void SystemManager::update() {
     }
 }
 
+// WiFi reconnection with exponential backoff
+void SystemManager::handleWiFiReconnection() {
+    static unsigned long lastReconnectAttempt = 0;
+    static int reconnectDelay = 1000; // Start with 1 second delay
+    const int maxDelay = 60000; // Max 60 seconds delay
+    
+    if (WiFi.status() == WL_CONNECTED) {
+        reconnectDelay = 1000; // Reset delay on successful connection
+        return;
+    }
+    
+    unsigned long currentTime = millis();
+    
+    if (currentTime - lastReconnectAttempt >= reconnectDelay) {
+        DEBUG_PRINTLN("Attempting WiFi reconnection...");
+        WiFi.reconnect();
+        
+        if (WiFi.waitForConnectResult() == WL_CONNECTED) {
+            DEBUG_PRINTLN("WiFi reconnected successfully");
+            reconnectDelay = 1000; // Reset delay
+        } else {
+            DEBUG_PRINTLN("WiFi reconnection failed, increasing delay");
+            reconnectDelay = min(reconnectDelay * 2, maxDelay); // Exponential backoff
+        }
+        
+        lastReconnectAttempt = currentTime;
+    }
+}
+
 void SystemManager::handleConfigurationMode() {
     // En modo configuración, mostrar mensaje y esperar configuración del RTC
     static unsigned long lastConfigMessage = 0;
     unsigned long currentTime = millis();
+    
+    // Handle WiFi connection in configuration mode
+    handleWiFiReconnection();
     
     if (currentTime - lastConfigMessage >= 5000) { // Mostrar mensaje cada 5 segundos
         LOG_INFO("\n🔧 🔧 🔧 MODO CONFIGURACIÓN ACTIVADO 🔧 🔧 🔧");

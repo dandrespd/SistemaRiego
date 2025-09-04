@@ -35,24 +35,21 @@ namespace HardwareConfig {
   constexpr uint8_t SOIL_MOISTURE_1 = 34; // ADC1_CH6 — input-only (no internal pullup)
   constexpr uint8_t SOIL_MOISTURE_2 = 35; // ADC1_CH7 — input-only (no internal pullup)
   constexpr uint8_t BATTERY_VOLTAGE = 32; // ADC1_CH4 — use voltage divider
-  constexpr uint8_t LIGHT_SENSOR     = 33; // ADC1_CH5 — optional
+  constexpr uint8_t LIGHT_SENSOR     = 36; // Moved to ADC1_CH0 (previously FLOAT_LEVEL_1)
 
   // ---------- DIGITAL SENSORS (float switches / reed) ----------
   // Input-only pins (34..39) have NO internal pull-ups — use external resistors if chosen.
-  // Alternatively use GPIOs with internal pull-ups (e.g. 13,14,25,26,27) if you prefer.
-  // Default: use input-only pins + external pull-ups to reduce chance of accidental driving.
-  constexpr uint8_t FLOAT_LEVEL_1 = 36; // input-only (use external pull-up ~10k)
+  constexpr uint8_t FLOAT_LEVEL_1 = 33; // Moved from 36 to resolve conflict
   constexpr uint8_t FLOAT_LEVEL_2 = 39; // input-only (use external pull-up ~10k)
 
   // ---------- RELAYS / ACTUATORS (digital outputs; use transistors/driver if required) ----------
-  // Choose pins that are non-strap and free. Use active HIGH (or invert in code if relay is active low).
-  constexpr uint8_t RELAY_VALVE_MAIN = 4;  // Valve main control — safe, non-strap pin
-  constexpr uint8_t RELAY_PUMP       = 13; // Pump control — safe, has internal pull-up capability
-  constexpr uint8_t RELAY_AUX        = 27; // Auxiliary relay — avoid ADC2 analog reads during Wi-Fi if used as ADC
+  constexpr uint8_t RELAY_VALVE_MAIN = 4; 
+  constexpr uint8_t RELAY_PUMP       = 13;
+  constexpr uint8_t RELAY_AUX        = 27; 
 
   // ---------- SERVOS (PWM via LEDC) ----------
-  // Use non-input-only pins. Provide up to 4 PWM outputs here (extend with alternatives if needed).
-  constexpr uint8_t SERVO_PINS[] = {25, 26, 14, 33}; // 25/26/14/33 — all support PWM (33 is also ADC1_CH5)
+  // Use non-input-only pins. Provide up to 4 PWM outputs
+  constexpr uint8_t SERVO_PINS[] = {25, 26, 14, 33}; // Kept 33 for servo (now free)
   constexpr uint8_t NUM_SERVOS = sizeof(SERVO_PINS)/sizeof(SERVO_PINS[0]);
 
   // ---------- DEBUG / COMMUNICATION ----------

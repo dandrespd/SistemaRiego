@@ -121,6 +121,11 @@ namespace HardwareConfig {
 - Input-only pins (34-39) used for sensors with external pull-ups
 - Flash pins (6-11) completely avoided
 
+**ADC Guidance:**
+- Always use ADC1 pins (32-39) for analog sensors to ensure reliable readings when WiFi is active
+- ADC2 pins become unreliable when WiFi is active due to RF interference
+- For more details, see [Espressif ADC2 Documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations-when-using-wi-fi)
+
 ### RTC DS1302 Wiring (3-Wire Interface)
 The DS1302 module uses a 3-wire interface that is different from standard I2C devices:
 
@@ -163,4 +168,3 @@ pio device monitor
 To verify RTC functionality, use the system's RTC test functionality:
 ```cpp
 sistemaRiego->readRTC(); // Returns current datetime
-```
