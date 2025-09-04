@@ -23,8 +23,9 @@
 #include <string>                              // For std::string
 #include <cstdint>                            // For uint8_t
 #include <sstream>                            // For stringstream
+#include "../../include/drivers/I2CManager.h" // Provides the I2C mutex
 #include "../../include/drivers/RTC_DS1302.h"  // Main class definition
-#include "../../include/core/SystemConfig.h"   // For DEBUG_PRINTLN
+#include "../../include/core/SystemConfig.h"   // For DEBUG_PRINTLN, pdMS_TO_TICKS, pdTRUE
 #include <cstring>                            // For memset
 #include <thread>                             // For sleep_for
 
@@ -164,10 +165,25 @@ bool RTC_DS1302::getDateTime(DateTime* dateTime) {
     }
     
     try {
-        // **LECTURA DEL HARDWARE**: Obtener datos del chip DS1302
+        // **LECTURA DEL HARDWARE**: Obtener datos del chip DS1302 con protección de mutex
         Ds1302::DateTime raw_dt;
-        rtc.getDateTime(&raw_dt);
-        if (raw_dt.year == 0) { // Check if date is invalid
+        bool operationSuccess = false;
+        
+        // Bloque de protección con mutex
+        if (Drivers::I2CManager::getMutex()) {
+            if (xSemaphoreTake(Drivers::I2CManager::getMutex(), pdMS_TO_TICKS(500)) == pdTRUE) {
+                rtc.getDateTime(&raw_dt);
+                xSemaphoreGive(Drivers::I2CManager::getMutex());
+                operationSuccess = true;
+            } else {
+                DEBUG_PRINTLN("[RTC_DS1302] Timeout al adquirir mutex para lectura");
+            }
+        } else {
+            rtc.getDateTime(&raw_dt);
+            operationSuccess = true;
+        }
+        
+        if (!operationSuccess || raw_dt.year == 0) { // Check if date is invalid
             DEBUG_PRINTLN("[RTC_DS1302 ERROR] Fallo de comunicación al leer RTC");
             lastError = RTCError::COMMUNICATION_FAILED;
             
@@ -256,8 +272,19 @@ bool RTC_DS1302::setDateTime(const DateTime& dateTime) {
         bool writeSuccess = false;
         
         while (retryCount < maxRetries && !writeSuccess) {
-            rtc.setDateTime(&raw_dt);
-            writeSuccess = true;
+            // Bloque de protección con mutex para escritura
+            if (Drivers::I2CManager::getMutex()) {
+                if (xSemaphoreTake(Drivers::I2CManager::getMutex(), pdMS_TO_TICKS(500)) == pdTRUE) {
+                    rtc.setDateTime(&raw_dt);
+                    xSemaphoreGive(Drivers::I2CManager::getMutex());
+                    writeSuccess = true;
+                } else {
+                    DEBUG_PRINTLN("[RTC_DS1302] Timeout al adquirir mutex para escritura");
+                }
+            } else {
+                rtc.setDateTime(&raw_dt);
+                writeSuccess = true;
+            }
             
             if (!writeSuccess) {
                 retryCount++;
@@ -322,7 +349,17 @@ bool RTC_DS1302::isHalted() {
     }
     
     try {
-        bool halted = rtc.isHalted();
+        bool halted = false;
+        if (Drivers::I2CManager::getMutex()) {
+            if (xSemaphoreTake(Drivers::I2CManager::getMutex(), pdMS_TO_TICKS(500)) == pdTRUE) {
+                halted = rtc.isHalted();
+                xSemaphoreGive(Drivers::I2CManager::getMutex());
+            } else {
+                DEBUG_PRINTLN("[RTC_DS1302] Timeout al adquirir mutex para verificación halted");
+            }
+        } else {
+            halted = rtc.isHalted();
+        }
         // Platform-independent timing using chrono
         auto now = std::chrono::system_clock::now();
         auto currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(
