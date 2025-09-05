@@ -8,43 +8,57 @@
 #ifndef PROJECT_CONFIG_H
 #define PROJECT_CONFIG_H
 
-// Configuración de red
-const char* WIFI_SSID = "RIEGO_INTELIGENTE";
-const char* WIFI_PASSWORD = "riego2025secure";
+#include <Arduino.h>
 
-// Configuración OTA
-const int OTA_PORT = 3232;
-const char* OTA_PASSWORD = "riego2025secure";
+struct SystemConfig {
+    // Configuración de red
+    String wifi_ssid = "RIEGO_INTELIGENTE";
+    String wifi_password = "riego2025secure";
 
-// Pines de hardware
-const int PIN_SERVO = 26;
-const int PIN_SENSOR_HUMEDAD = 35;
+    // Configuración OTA
+    int ota_port = 3232;
+    String ota_password = "riego2025secure";
 
-// Parámetros del sistema
-const int INTERVALO_LECTURA = 5000;  // ms
-const float HUMEDAD_UMBRAL = 40.0;   // %
+    // Pines de hardware
+    int pin_servo = 26;
+    int pin_sensor_humedad = 35;
 
-// Configuración de seguridad
-const int MAX_TOTAL_IRRIGATION_TIME_MINUTES = 120;   // 2 horas máx
-const int WATCHDOG_TIMEOUT_MS = 5000;                // 5 segundos
-const int MAX_CONSECUTIVE_ERRORS = 5;                // 5 errores consecutivos
+    // Pines para múltiples servos
+    int num_servos = 4;
+    int servo_pins[4] = {26, 27, 32, 33};
 
-// Configuración de red
-const int WEB_SERVER_PORT = 80;                     // Puerto HTTP
-const int WIFI_CONNECTION_TIMEOUT_MS = 10000;       // 10 segundos timeout
-const int MAX_WIFI_RETRY_ATTEMPTS = 3;              // 3 reintentos
+    // Pines RTC
+    int rtc_rst = 25;
+    int rtc_sclk = 14;
+    int rtc_io = 13;
 
-// Configuración de hardware
-const int NUM_SERVOS = 4;                           // 4 servos
-const int SERVO_PINS[] = {26, 27, 32, 33};          // Pines para servos
-const int RTC_RST = 25;                             // RST RTC
-const int RTC_SCLK = 14;                            // SCLK RTC
-const int RTC_IO = 13;                              // IO RTC
-const int LED = 2;                                  // Pin LED
+    // Pin LED
+    int led = 2;
 
-// Configuración de debug
-const bool ENABLE_SERIAL_DEBUGGING = true;
-const bool ENABLE_VERBOSE_LOGGING = false;
-const int SERIAL_BAUD_RATE = 115200;
+    // Parámetros del sistema
+    int intervalo_lectura = 5000;  // ms
+    float humedad_umbral = 40.0;   // %
+
+    // Configuración de seguridad
+    int max_total_irrigation_time_minutes = 120;   // 2 horas máx
+    int watchdog_timeout_ms = 5000;                // 5 segundos
+    int max_consecutive_errors = 5;                // 5 errores consecutivos
+
+    // Configuración de red
+    int web_server_port = 80;                     // Puerto HTTP
+    int wifi_connection_timeout_ms = 10000;       // 10 segundos timeout
+    int max_wifi_retry_attempts = 3;              // 3 reintentos
+
+    // Configuración de debug
+    bool enable_serial_debugging = true;
+    bool enable_verbose_logging = false;
+    int serial_baud_rate = 115200;
+
+    // Métodos para load/save (implementar en ConfigManager)
+    bool loadFromJson(const String& json);
+    String saveToJson() const;
+};
+
+extern SystemConfig globalConfig;
 
 #endif // PROJECT_CONFIG_H

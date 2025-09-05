@@ -8,31 +8,18 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <Arduino.h>
-#include <core/SystemManager.h>
-#include "core/SystemConfig.h"
-#include "core/EventBus.h"
+#include "../include/ProjectConfig.h"
 #include "core/ConfigManager.h"
+#include "core/SystemConfigValidator.h"
 #include "drivers/I2CManager.h"
 #include "drivers/RTC_DS1302.h"
-#include "network/WiFiConfig.h"
-#include "network/NTPTimeSync.h"
+#include "drivers/Led.h"
+#include "drivers/ServoPWMController.h"
 #include "utils/Logger.h"
 #include "utils/SET_DATE.h"
 #include "utils/GET_DATE.h"
-#include "SystemManager.h"
-#include "ConfigManager.h"
-#include "Logger.h"
-#include "Utils.h"
-#include "GET_DATE.h"
-#include "SET_DATE.h"
-#include "IN_DIGITAL.h"
-#include "SET_PIN.h"
-#include "WebSocketManager.h"
-#include "SystemConfig.h"
-#include "RTC_DS1302.h"
-#include "Led.h"
-#include "ServoPWMController.h"
+#include "utils/Utils.h"
+#include "network/WebSocketManager.h"
 
 SystemManager::SystemManager(RTC_DS1302* rtc, Led* statusLed, ServoPWMController* servoController)
     : rtc(rtc)
@@ -191,7 +178,7 @@ void SystemManager::update() {
     
     // Reporte de estado cada 60 segundos
     if (currentTime - lastStatusReport >= 60000) {
-        if (SystemDebug::ENABLE_VERBOSE_LOGGING) {
+        if (globalConfig.enable_verbose_logging) {
             generateStatusReport();
         }
         lastStatusReport = currentTime;
@@ -212,7 +199,7 @@ void SystemManager::update() {
     // Validación de salud del sistema
     if (!validateSystemHealth()) {
         consecutiveErrors++;
-        if (consecutiveErrors > SystemSafety::MAX_CONSECUTIVE_ERRORS) {
+        if (consecutiveErrors > globalConfig.max_consecutive_errors) {
             currentState = SystemState::EMERGENCY_STOP;
             lastStateChange = currentTime;
         }
@@ -554,11 +541,9 @@ void SystemManager::setWebSocketManager(WebSocketManager* manager) {
 }
 
 void SystemManager::printSystemInfo() const {
-    // Print system information from SystemInfo namespace
+    // Print system information 
     LOG_INFO("=== INFORMACIÓN DEL SISTEMA ===");
-    LOG_INFO("Versión: " + String(SystemInfo::VERSION));
-    LOG_INFO("Fecha de compilación: " + String(SystemInfo::BUILD_DATE) + " " + String(SystemInfo::BUILD_TIME));
-    LOG_INFO("Compilador: " + String(SystemInfo::COMPILER_VERSION));
+    LOG_INFO("Versión: Sistema de Riego v3.3");
     LOG_INFO("Memoria libre: " + String(ESP.getFreeHeap()) + " bytes");
     LOG_INFO("Memoria mínima: " + String(minimumFreeMemory) + " bytes");
     LOG_INFO("Estado actual: " + String(getCurrentStateString()));

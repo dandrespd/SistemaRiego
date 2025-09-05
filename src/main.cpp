@@ -9,13 +9,15 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "utils/Utils.h"
-#include "core/SystemConfig.h"
+#include "core/ConfigManager.h"
+#include "../include/ProjectConfig.h"
 #include "core/SystemManager.h"
 #include "network/WebControl.h"
 #include "drivers/ServoPWMController.h"
 #include "drivers/RTC_DS1302.h"
 #include "drivers/Led.h"
 #include "drivers/I2CManager.h"
+#include "utils/RTCSerialCommands.h"
 #include <ArduinoOTA.h>
 
 RTC_DS1302* rtcInstance = nullptr;
@@ -24,7 +26,8 @@ ServoPWMController* servoControllerInstance = nullptr;
 SystemManager* sistemaRiego = nullptr;
 
 void setup() {
-    Serial.begin(SystemDebug::SERIAL_BAUD_RATE);
+    Serial.begin(115200);  // Usar valor temporal, luego usar globalConfig.serial_baud_rate
+    ConfigManager::getInstance()->initialize();
     Drivers::I2CManager::begin();
     delay(2000);
     
@@ -34,9 +37,9 @@ void setup() {
     DEBUG_PRINTLN(repeatChar('=', 70));
     
     DEBUG_PRINTLN("\n🔧 [SETUP] Creando dependencias del sistema...");
-    rtcInstance = new RTC_DS1302(HardwareConfig::RTC_RST, HardwareConfig::RTC_SCLK, HardwareConfig::RTC_IO);
-    statusLedInstance = new Led(LED);
-    servoControllerInstance = new ServoPWMController(NUM_SERVOS);
+    rtcInstance = new RTC_DS1302(globalConfig.rtc_rst, globalConfig.rtc_sclk, globalConfig.rtc_io);
+    statusLedInstance = new Led(globalConfig.led);
+    servoControllerInstance = new ServoPWMController(globalConfig.num_servos);
     DEBUG_PRINTLN("✅ [SETUP] Dependencias creadas exitosamente.");
 
     DEBUG_PRINTLN("\n🔧 [SETUP] Creando SystemManager...");
@@ -53,9 +56,8 @@ void setup() {
     setupWebControl(sistemaRiego);
     
     DEBUG_PRINTLN("\n📡 [SETUP] Configurando actualizaciones OTA...");
-    #include "config.local.h"
     ArduinoOTA.setHostname("riego-inteligente");
-    ArduinoOTA.setPassword(OTA_PASSWORD_LOCAL);
+    ArduinoOTA.setPassword(globalConfig.ota_password.c_str());
     
     ArduinoOTA.onStart([]() { DEBUG_PRINTLN("[OTA] Iniciando actualización..."); });
     ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
@@ -66,10 +68,18 @@ void setup() {
     
     ArduinoOTA.begin();
     DEBUG_PRINTLN("✅ [OTA] OTA inicializado");
+    
+    DEBUG_PRINTLN("\n🕐 [SETUP] Inicializando comandos RTC por serial...");
+    initializeRTCSerialCommands(rtcInstance);
+    DEBUG_PRINTLN("✅ [SETUP] Comandos RTC seriales configurados");
 }
 
 void loop() {
     if (sistemaRiego) sistemaRiego->update();
+    
+    // Procesar comandos RTC por serial
+    processRTCSerialCommands();
+    
     ArduinoOTA.handle();
     yield();
 }

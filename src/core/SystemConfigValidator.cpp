@@ -1,4 +1,5 @@
 #include "../../include/ProjectConfig.h"
+#include "../../include/core/SystemConfigValidator.h"
 #include <stdio.h>
 #include <string>
 #include "../../lib/utils/Utils.h"
@@ -10,17 +11,17 @@ void logMessage(const std::string& message) {
 
 bool SystemConfigValidator::validateSafetyLimits() {
     // Verificar que los límites de seguridad sean razonables
-    return (MAX_TOTAL_IRRIGATION_TIME_MINUTES > 0 && 
-            MAX_TOTAL_IRRIGATION_TIME_MINUTES <= 1440 && // Máximo 24 horas
-            WATCHDOG_TIMEOUT_MS >= 1000 && // Mínimo 1 segundo
-            MAX_CONSECUTIVE_ERRORS > 0);
+    return (globalConfig.max_total_irrigation_time_minutes > 0 && 
+            globalConfig.max_total_irrigation_time_minutes <= 1440 && // Máximo 24 horas
+            globalConfig.watchdog_timeout_ms >= 1000 && // Mínimo 1 segundo
+            globalConfig.max_consecutive_errors > 0);
 }
 
 bool SystemConfigValidator::validateNetworkSettings() {
     // Verificar configuración de red
-    return (WEB_SERVER_PORT > 0 &&
-            WIFI_CONNECTION_TIMEOUT_MS >= 5000 &&
-            MAX_WIFI_RETRY_ATTEMPTS > 0);
+    return (globalConfig.web_server_port > 0 &&
+            globalConfig.wifi_connection_timeout_ms >= 5000 &&
+            globalConfig.max_wifi_retry_attempts > 0);
 }
 
 bool SystemConfigValidator::validateHardwareConfiguration() {
@@ -28,9 +29,9 @@ bool SystemConfigValidator::validateHardwareConfiguration() {
     bool valid = true;
     
     // Verificar pines para servos
-    if (NUM_SERVOS > 0) {
-        for (int i = 0; i < NUM_SERVOS; i++) {
-            if (SERVO_PINS[i] == 0) {
+    if (globalConfig.num_servos > 0) {
+        for (int i = 0; i < globalConfig.num_servos; i++) {
+            if (globalConfig.servo_pins[i] == 0) {
                 logMessage("[CONFIG ERROR] Pin no definido para servo " + std::to_string(i));
                 valid = false;
             }
@@ -38,7 +39,7 @@ bool SystemConfigValidator::validateHardwareConfiguration() {
     }
     
     // Verificar pines RTC
-    if (RTC_RST == 0 || RTC_SCLK == 0 || RTC_IO == 0) {
+    if (globalConfig.rtc_rst == 0 || globalConfig.rtc_sclk == 0 || globalConfig.rtc_io == 0) {
         logMessage("[CONFIG ERROR] Pines RTC no definidos correctamente");
         valid = false;
     }
@@ -81,26 +82,26 @@ void SystemConfigValidator::printConfigurationSummary() {
     logMessage(divider);
     
     logMessage("🔧 CONFIGURACIÓN DE DEBUG:");
-    logMessage(std::string("   • Serial debugging: ") + (ENABLE_SERIAL_DEBUGGING ? "HABILITADO" : "DESHABILITADO"));
-    logMessage(std::string("   • Verbose logging: ") + (ENABLE_VERBOSE_LOGGING ? "HABILITADO" : "DESHABILITADO"));
-    logMessage("   • Baud rate: " + std::to_string(SERIAL_BAUD_RATE));
+    logMessage(std::string("   • Serial debugging: ") + (globalConfig.enable_serial_debugging ? "HABILITADO" : "DESHABILITADO"));
+    logMessage(std::string("   • Verbose logging: ") + (globalConfig.enable_verbose_logging ? "HABILITADO" : "DESHABILITADO"));
+    logMessage("   • Baud rate: " + std::to_string(globalConfig.serial_baud_rate));
     
     logMessage("\n🛡️ CONFIGURACIÓN DE SEGURIDAD:");
-    logMessage("   • Tiempo máximo riego total: " + std::to_string(MAX_TOTAL_IRRIGATION_TIME_MINUTES) + " minutos");
-    logMessage("   • Timeout watchdog: " + std::to_string(WATCHDOG_TIMEOUT_MS / 1000) + " segundos");
-    logMessage("   • Errores máximos consecutivos: " + std::to_string(MAX_CONSECUTIVE_ERRORS));
+    logMessage("   • Tiempo máximo riego total: " + std::to_string(globalConfig.max_total_irrigation_time_minutes) + " minutos");
+    logMessage("   • Timeout watchdog: " + std::to_string(globalConfig.watchdog_timeout_ms / 1000) + " segundos");
+    logMessage("   • Errores máximos consecutivos: " + std::to_string(globalConfig.max_consecutive_errors));
     
     logMessage("\n🌐 CONFIGURACIÓN DE RED:");
-    logMessage("   • Puerto servidor web: " + std::to_string(WEB_SERVER_PORT));
-    logMessage("   • Timeout conexión WiFi: " + std::to_string(WIFI_CONNECTION_TIMEOUT_MS / 1000) + " segundos");
-    logMessage("   • Máximo reintentos WiFi: " + std::to_string(MAX_WIFI_RETRY_ATTEMPTS));
+    logMessage("   • Puerto servidor web: " + std::to_string(globalConfig.web_server_port));
+    logMessage("   • Timeout conexión WiFi: " + std::to_string(globalConfig.wifi_connection_timeout_ms / 1000) + " segundos");
+    logMessage("   • Máximo reintentos WiFi: " + std::to_string(globalConfig.max_wifi_retry_attempts));
     
     logMessage("\n🔌 CONFIGURACIÓN OF HARDWARE:");
-    logMessage("   • Número de servos: " + std::to_string(NUM_SERVOS));
-    logMessage("   • Pines RTC: RST=" + std::to_string(RTC_RST) +
-        ", SCLK=" + std::to_string(RTC_SCLK) +
-        ", IO=" + std::to_string(RTC_IO));
-    logMessage("   • LED de estado: Pin " + std::to_string(LED));
+    logMessage("   • Número de servos: " + std::to_string(globalConfig.num_servos));
+    logMessage("   • Pines RTC: RST=" + std::to_string(globalConfig.rtc_rst) +
+        ", SCLK=" + std::to_string(globalConfig.rtc_sclk) +
+        ", IO=" + std::to_string(globalConfig.rtc_io));
+    logMessage("   • LED de estado: Pin " + std::to_string(globalConfig.led));
     
     logMessage(divider + "\n");
 }
