@@ -8,7 +8,18 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <ESP.h>
+#include <Arduino.h>
+#include <core/SystemManager.h>
+#include "core/SystemConfig.h"
+#include "core/EventBus.h"
+#include "core/ConfigManager.h"
+#include "drivers/I2CManager.h"
+#include "drivers/RTC_DS1302.h"
+#include "network/WiFiConfig.h"
+#include "network/NTPTimeSync.h"
+#include "utils/Logger.h"
+#include "utils/SET_DATE.h"
+#include "utils/GET_DATE.h"
 #include "SystemManager.h"
 #include "ConfigManager.h"
 #include "Logger.h"

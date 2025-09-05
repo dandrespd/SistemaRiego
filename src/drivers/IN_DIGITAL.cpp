@@ -1,4 +1,4 @@
-#include "IN_DIGITAL.h"
+#include <drivers/IN_DIGITAL.h>
 
 // Constructor: Almacena el pin especificado.
 InDigital::InDigital(uint8_t pin) : pin(pin) {}

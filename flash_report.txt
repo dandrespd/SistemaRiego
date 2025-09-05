@@ -1,0 +1,57 @@
+## Información del chip ESP32 ##
+[0;33mWarning:[0m Deprecated: Command 'chip_id' is deprecated. Use 'chip-id' instead.
+esptool v5.0.2
+Serial port /dev/ttyUSB0:
+Connecting....
+Detecting chip type... ESP32
+[1A[2K[1A[2K[1A[2KConnected to ESP32 on /dev/ttyUSB0:
+Chip type:          ESP32-D0WDQ6 (revision v1.0)
+Features:           Wi-Fi, BT, Dual Core + LP Core, 240MHz, Vref calibration in eFuse, Coding Scheme None
+Crystal frequency:  40MHz
+MAC:                08:3a:f2:a9:c6:5c
+
+Uploading stub flasher...
+Running stub flasher...
+[1A[2K[1A[2KStub flasher running.
+
+[0;33mWarning:[0m ESP32 has no chip ID. Reading MAC address instead.
+MAC:                08:3a:f2:a9:c6:5c
+
+Hard resetting via RTS pin...
+
+## Proceso de Carga ##
+Processing esp32doit-usb (platform: espressif32; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.12.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 2.0.14+sha.44da992 
+ - tool-esptoolpy @ 2.40900.250804 (4.9.0) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - tool-openocd-esp32 @ 2.1100.20220706 (11.0) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 33 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- FS @ 2.0.0
+|-- SPIFFS @ 2.0.0
+|-- WiFi @ 2.0.0
+|-- Wire @ 2.0.0
+|-- ArduinoOTA @ 2.0.0
+|-- ESPmDNS @ 2.0.0
+Building in release mode
+Compiling .pio/build/esp32doit-usb/src/core/ConfigManager.cpp.o
+Compiling .pio/build/esp32doit-usb/src/core/SystemConfigValidator.cpp.o
+Compiling .pio/build/esp32doit-usb/src/core/SystemManager.cpp.o
+Compiling .pio/build/esp32doit-usb/src/drivers/I2CManager.cpp.o
+Compiling .pio/build/esp32doit-usb/src/drivers/IN_DIGITAL.cpp.o
+Compiling .pio/build/esp32doit-usb/src/drivers/Led.cpp.o
+Compiling .pio/build/esp32doit-usb/src/drivers/OUT_DIGITAL.cpp.o
+

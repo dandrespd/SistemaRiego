@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "../../include/core/ConfigManager.h"
-#include "core/SystemConfig.h"
-#include "utils/Logger.h"
+#include <core/ConfigManager.h>
+#include "../../include/core/SystemConfig.h"
+#include "core/utils/Logger.h"
 #include <SPIFFS.h>
 #include <FS.h>
 #include <ArduinoJson.h>

@@ -1,17 +1,28 @@
-# Smart Irrigation System
+# Sistema de Riego Inteligente
 
-This project consists of:
-- Firmware for ESP32-based irrigation controller
-- Web application for monitoring and configuration
+## Estructura del Proyecto
+```bash
+├── src/              # Código fuente principal (C++/Arduino)
+│   ├── core/         # Core del sistema
+│   ├── drivers/      # Drivers de dispositivos
+│   ├── network/      # Funciones de red
+│   └── utils/        # Utilidades
+├── lib/              # Librerías personalizadas
+│   ├── drivers/      # Headers de drivers
+│   └── utils/        # Headers de utilidades
+├── data/             # Archivos para sistema de archivos SPIFFS/LittleFS
+├── web/              # Aplicación web de control
+└── test/             # Pruebas unitarias
+```
 
-## Prerequisites
+## Prerrequisitos
 - Node.js >= 18.x
-- pnpm: First install globally with `npm install -g pnpm`
-- PlatformIO (for firmware development)
+- pnpm: Instalar globalmente con `npm install -g pnpm`
+- PlatformIO para desarrollo del firmware
 
-If you encounter "pnpm command not found" errors:
-1. Make sure Node.js is properly installed
-2. Add pnpm to your PATH: `export PATH="$PATH:$HOME/.npm-global/bin"` (Linux/macOS)
+Si encuentra el error "pnpm command not found":
+1. Verifique que Node.js esté instalado correctamente
+2. Agregue pnpm al PATH: `export PATH="$PATH:$HOME/.npm-global/bin"` (Linux/macOS)
    or update system environment variables (Windows)
 
 ## Installation
@@ -34,21 +45,39 @@ If you encounter "pnpm command not found" errors:
    pnpm install
    ```
 
-3. Setup firmware dependencies:
+## Instalación
+1. Clonar el repositorio:
    ```bash
-   cd firmware
+   git clone https://github.com/dandrespd/SistemaRiego.git
+   cd SistemaRiego
+   ```
+
+2. Configurar variables de entorno para la aplicación web:
+   ```bash
+   cd web
+   cp .env.example .env
+   # Editar .env con los detalles de tu ESP32
+   ```
+   
+3. Instalar dependencias de la aplicación web:
+   ```bash
+   cd web
+   pnpm install
+   ```
+
+4. Instalar dependencias del firmware (desde la raíz del proyecto):
+   ```bash
    pio run
    ```
 
-## Running the Web Application
+## Ejecutar Aplicación Web
 ```bash
 cd web
 pnpm dev
 ```
 
-## Building and Flashing Firmware
+## Compilar y Subir Firmware
 ```bash
-cd firmware
 pio run -t upload
 ```
 
@@ -81,10 +110,30 @@ On first boot, you'll be guided to:
 3. Commit and push: `git push origin feature/your-feature`
 4. Create a pull request
 
-## Hardware Documentation
+## Pruebas
+### Ejecutar pruebas unitarias
+```bash
+pio test
+```
 
-### Pin Mapping (ESP32 DOIT DEVKIT V1)
-We've implemented a comprehensive pin mapping that avoids problematic GPIOs and follows best practices:
+### Prueba de I2C
+Para dispositivos I2C como pantallas LCD:
+```bash
+cd test
+pio run -e i2c-scanner -t upload
+```
+
+### Prueba de RTC
+Para verificar el funcionamiento del reloj RTC:
+```bash
+cd test
+pio run -e rtc-test -t upload
+```
+
+## Documentación Hardware
+
+### Mapeo de Pines (ESP32 DOIT DEVKIT V1)
+Hemos implementado un mapeo completo que evita GPIO problemáticos:
 
 ```c++
 namespace HardwareConfig {
@@ -126,8 +175,8 @@ namespace HardwareConfig {
 - ADC2 pins become unreliable when WiFi is active due to RF interference
 - For more details, see [Espressif ADC2 Documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/adc.html#adc-limitations-when-using-wi-fi)
 
-### RTC DS1302 Wiring (3-Wire Interface)
-The DS1302 module uses a 3-wire interface that is different from standard I2C devices:
+### RTC DS1302 Wiring (Interfaz 3 hilos)
+El módulo DS1302 usa una interfaz de 3 hilos diferente de los dispositivos I2C estándar:
 
 | DS1302 Pin | ESP32 Pin (DOIT DEVKIT V1) | Description      |
 |------------|----------------------------|------------------|
@@ -137,32 +186,22 @@ The DS1302 module uses a 3-wire interface that is different from standard I2C de
 
 **Note:** This is a 3-wire interface (CE/CLK/IO), not standard I2C. The connections listed above match the configuration in SystemConfig.h.
 
-### Initial Flashing
-To flash the device for the first time using USB:
+### Flasheo Inicial
+Para flashear el dispositivo por primera vez usando USB:
 
 ```bash
-# For Linux/macOS
+# Linux/macOS
 scripts/initial_flash.sh
 
-# For Windows
+# Windows
 pio run -e esp32doit-usb -t upload
 ```
 
-### I2C Scan Tool
-To help diagnose I2C devices (like LCD displays), we provide a scanning tool:
-
-1. Upload the I2C scanner sketch:
-```bash
-cd firmware/tools
-pio run -e esp32doit-usb -t upload --upload-port YOUR_PORT
-```
-
-2. Open the serial monitor to see results:
-```bash
-pio device monitor
-```
-
-3. If an LCD display is connected, it should appear at address `0x3F` (or similar).
+### Contribuciones
+1. Crear nueva rama: `git checkout -b feature/tu-caracteristica`
+2. Realizar cambios
+3. Hacer commit y push: `git push origin feature/tu-caracteristica`
+4. Crear pull request
 
 ### RTC Test
 To verify RTC functionality, use the system's RTC test functionality:

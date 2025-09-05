@@ -1,4 +1,4 @@
-#include "OUT_DIGITAL.h"
+#include <drivers/OUT_DIGITAL.h>
 
 // Constructor: Almacena el pin especificado.
 OutDigital::OutDigital(uint8_t pin) : pin(pin) {}

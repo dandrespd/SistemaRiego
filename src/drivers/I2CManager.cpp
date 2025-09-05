@@ -1,5 +1,7 @@
-#include "drivers/I2CManager.h"
+#include <Arduino.h>
+#include <drivers/I2CManager.h>
 #include "core/SystemConfig.h"
+#include <Wire.h>
 
 using namespace Drivers;
 
